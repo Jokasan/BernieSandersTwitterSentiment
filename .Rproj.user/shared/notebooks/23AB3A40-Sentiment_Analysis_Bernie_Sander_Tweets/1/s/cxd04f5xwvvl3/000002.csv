@@ -1,4 +1,0 @@
-"0","library(syuzhet)"
-"0","# use the cleaned text for emotion analysis "
-"0","# since get_nrc_sentiment cannot deal with non-graphic data "
-"0","tweet_clean <- data.frame(text = sapply(myCorpus, as.character), stringsAsFactors = FALSE)"

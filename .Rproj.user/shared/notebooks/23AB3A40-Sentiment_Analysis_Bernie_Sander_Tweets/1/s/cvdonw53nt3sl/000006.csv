@@ -1,4 +1,0 @@
-"0","library(plotly)"
-"0","library(ggplot2)"
-"0","sentiment_plot <- qplot(sentiment, data=td_new, weight=count, geom=""bar"",fill=sentiment)+ggtitle(""Tweets emotion and sentiment"")+theme_minimal()+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))"
-"0","ggplotly(sentiment_plot)"

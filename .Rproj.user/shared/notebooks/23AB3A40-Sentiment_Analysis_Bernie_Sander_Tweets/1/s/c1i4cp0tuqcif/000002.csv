@@ -1,9 +1,0 @@
-"0","myCorpus_raw <- Corpus(VectorSource(tweets.df$text))"
-"0","myCorpus <- myCorpus_raw "
-"0","myCorpus"
-"1","<<SimpleCorpus>>
-"
-"1","Metadata:  corpus specific: 1, document level (indexed): 0
-"
-"1","Content:  documents: 583
-"
