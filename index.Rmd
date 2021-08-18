@@ -307,7 +307,8 @@ ggplotly(p2)
 ```
 
 As we can see there seems to be a peak in positive sentiment in Bernie's
-tweets between the May and July periods. We might want to check out these tweets more closely to see why this was the case, filtering using a regular expression to filter 
+tweets between the May and July periods, on 2021-06-09 to be specific. We might want to check out these tweets more closely to see why this was the case, filtering using a regular 
+expression to filter 
 for the date, will allow us to do so:
 ```{r}
 filter(tweets.df, grepl('2021-06-09',created)) %>% select(text)
