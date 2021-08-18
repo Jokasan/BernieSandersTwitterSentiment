@@ -230,14 +230,14 @@ term.freq <- subset(term.freq, term.freq >= freq_thre)
 
 We may wish to plot the word frequencies:
 
-```{r }
+```{r, fig.cap="Term Frequency in Bernie Sander Tweets"}
 library(ggplot2)
 # select the words(terms) appeared more then freq_thre times, according to selected term.freq
 df <- data.frame(term = names(term.freq), freq = term.freq)
 p1 <- ggplot(df, aes(x=term, y=freq)) + geom_bar(stat="identity") +
   xlab("Terms") + ylab("Count") + coord_flip() +
   theme(axis.text=element_text(size=7))+theme_light()
-ggplotly(p1)
+p1
 ```
 
 
