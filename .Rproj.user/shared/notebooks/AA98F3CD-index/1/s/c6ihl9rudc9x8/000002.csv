@@ -1,0 +1,4 @@
+"0","# calculate the word frenquency "
+"0","term.freq <- rowSums(as.matrix(tdm)) "
+"0","# only keep the frequencies of words(terms) appeared more then freq_thre times"
+"0","term.freq <- subset(term.freq, term.freq >= freq_thre) "

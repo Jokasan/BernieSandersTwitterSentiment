@@ -1,0 +1,5 @@
+"0","# Matrix Transpose"
+"0","td <- data.frame(t(emotion_matrix)) "
+"0","#The function rowSums computes column sums across rows for each level of a grouping variable."
+"0","td_new <- data.frame(rowSums(td))"
+"0","td_new"

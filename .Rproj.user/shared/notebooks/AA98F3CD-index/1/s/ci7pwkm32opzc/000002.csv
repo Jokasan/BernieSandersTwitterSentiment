@@ -1,0 +1,6 @@
+"0","library(ggplot2)"
+"0","# select the words(terms) appeared more then freq_thre times, according to selected term.freq"
+"0","df <- data.frame(term = names(term.freq), freq = term.freq)"
+"0","ggplot(df, aes(x=term, y=freq)) + geom_bar(stat=""identity"") +"
+"0","  xlab(""Terms"") + ylab(""Count"") + coord_flip() +"
+"0","  theme(axis.text=element_text(size=7))+theme_light()"

@@ -1,0 +1,7 @@
+"0","removeURL <- function(x) gsub(""http[^[:space:]]*"", """", x)"
+"0","myCorpus <- tm_map(myCorpus, content_transformer(removeURL))"
+"2","Warning in tm_map.SimpleCorpus(myCorpus, content_transformer(removeURL)) :"
+"2","
+ "
+"2"," transformation drops documents
+"
