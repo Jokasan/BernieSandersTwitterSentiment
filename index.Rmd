@@ -15,7 +15,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE, warning=FALSE}
-pacman::p_load(twitteR,ROAuth,tidyverse,tm,SnowballC,topicmodels,sentiment,data.table,syuzhet,plotly)
+pacman::p_load(twitteR,ROAuth,tidyverse,tm,SnowballC,topicmodels,sentiment,data.table,syuzhet,plotly,gridGraphics)
 ```
 
 # Project Goal
@@ -230,7 +230,7 @@ term.freq <- subset(term.freq, term.freq >= freq_thre)
 
 We may wish to plot the word frequencies:
 
-```{r, fig.cap="Frequency of terms"}
+```{r,  eval=FALSE, echo=FALSE}
 library(ggplot2)
 # select the words(terms) appeared more then freq_thre times, according to selected term.freq
 df <- data.frame(term = names(term.freq), freq = term.freq)
@@ -238,6 +238,12 @@ ggplot(df, aes(x=term, y=freq)) + geom_bar(stat="identity") +
   xlab("Terms") + ylab("Count") + coord_flip() +
   theme(axis.text=element_text(size=7))+theme_light()
 ```
+
+```{r, fig.cap="Frequency of terms",echo=FALSE}
+load("term_freq.rda")
+p1
+```
+
 
 # Associations
 
@@ -291,16 +297,21 @@ We may wish to visualise the sentiment, where he negative values are
 associated with negative sentiment and positive values with positive
 sentiment, in contrast, neutral is 0:
 
-```{r, fig.cap="Sentiment of tweets, November 2020 to August 2021"}
+```{r, eval=FALSE}
 library(data.table)
 sentiments$score <- 0
 sentiments$score[sentiments$polarity == "positive"] <- 1
 sentiments$score[sentiments$polarity == "negative"] <- -1
 sentiments$date <- as.IDate(tweets.df$created)
 result <- aggregate(score ~ date, data = sentiments, sum)
-par(mar=c(2,2,2,2)) #set the margins of the plot
-plot(result, type = "l")
+# plot the scores
+result %>% ggplot(aes(date,score)) +geom_line()+theme_light()
 ```
+```{r,fig.cap="Sentiment of tweets, November 2020 to August 2021", echo=FALSE}
+load("sentiment.rda")
+p2
+```
+
 
 As we can see there seems to be a peak in positive sentiment in Bernie's
 tweets between the May and July periods.

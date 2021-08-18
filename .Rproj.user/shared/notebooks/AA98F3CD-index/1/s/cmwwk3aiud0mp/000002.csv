@@ -1,13 +1,3 @@
 "0","myCorpus<- tm_map(myCorpus,toSpace,""[^[:graph:]]"")"
-"2","Warning in tm_map.SimpleCorpus(myCorpus, toSpace, ""[^[:graph:]]"") :"
-"2","
- "
-"2"," transformation drops documents
-"
 "0","# Convert to lower case"
 "0","myCorpus <- tm_map(myCorpus, content_transformer(tolower))"
-"2","Warning in tm_map.SimpleCorpus(myCorpus, content_transformer(tolower)) :"
-"2","
- "
-"2"," transformation drops documents
-"

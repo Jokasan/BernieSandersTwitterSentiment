@@ -1,5 +1,0 @@
-"0","#Transformation and cleaning"
-"0","names(td_new)[1] <- ""count"""
-"0","td_new <- cbind(""sentiment"" = rownames(td_new), td_new)"
-"0","rownames(td_new) <- NULL"
-"0","knitr::kable(td_new)"
