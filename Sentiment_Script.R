@@ -42,7 +42,7 @@ write.csv(tweets.df, file = file_name)
 ###### Step 1: read tweets from csv file 
 tweets.df <- read.csv('Bernie_tweets.csv', stringsAsFactors = FALSE)
 # # check the tweet #150
-display_n <- 50
+display_n <- 150
 tweets.df[display_n, c("id", "created", "screenName", "replyToSN",
                        "favoriteCount", "retweetCount", "longitude", "latitude", "text")]
 
@@ -55,7 +55,6 @@ library(tm)
 
 myCorpus_raw <- Corpus(VectorSource(tweets.df$text))
 myCorpus <- myCorpus_raw 
-
 
 lapply(myCorpus_raw[1:3], as.character)
 lapply(myCorpus[1:3], as.character)
