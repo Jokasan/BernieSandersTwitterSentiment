@@ -1,0 +1,21 @@
+"0","removeNumPunct <- function(x) gsub(""[^[:alpha:][:space:]]*"", """", x) "
+"0","myCorpus <- tm_map(myCorpus, content_transformer(removeNumPunct))"
+"2","Warning in tm_map.SimpleCorpus(myCorpus, content_transformer(removeNumPunct)) :"
+"2","
+ "
+"2"," transformation drops documents
+"
+"0","# remove stopwords"
+"0","myCorpus <- tm_map(myCorpus, removeWords, stopwords()) "
+"2","Warning in tm_map.SimpleCorpus(myCorpus, removeWords, stopwords()) :"
+"2","
+ "
+"2"," transformation drops documents
+"
+"0","# remove extra whitespace"
+"0","myCorpus <- tm_map(myCorpus, stripWhitespace)"
+"2","Warning in tm_map.SimpleCorpus(myCorpus, stripWhitespace) :"
+"2","
+ "
+"2"," transformation drops documents
+"

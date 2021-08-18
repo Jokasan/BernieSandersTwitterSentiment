@@ -1,0 +1,26 @@
+{
+    "id": "52A16F6A",
+    "path": "~/Documents/R/Demos/Tweet_Sentiment/Sentiment_Script.R",
+    "project_path": "Sentiment_Script.R",
+    "type": "r_source",
+    "hash": "2225122768",
+    "contents": "",
+    "dirty": false,
+    "created": 1629270458603.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "161,0",
+        "scrollLine": "150"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1629282560,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1629282560338,
+    "read_only": false,
+    "read_only_alternatives": []
+}
