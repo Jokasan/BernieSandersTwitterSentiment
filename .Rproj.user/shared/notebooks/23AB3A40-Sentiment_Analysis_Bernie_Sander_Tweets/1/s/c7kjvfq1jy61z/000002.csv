@@ -1,0 +1,7 @@
+"0","library(""SnowballC"")"
+"0","myCorpus <- tm_map(myCorpus, stemDocument)"
+"2","Warning in tm_map.SimpleCorpus(myCorpus, stemDocument) :"
+"2","
+ "
+"2"," transformation drops documents
+"

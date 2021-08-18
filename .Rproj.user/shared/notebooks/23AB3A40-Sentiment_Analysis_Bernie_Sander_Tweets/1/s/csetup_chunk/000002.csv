@@ -1,0 +1,1 @@
+"0","pacman::p_load(twitteR,ROAuth,tidyverse,tm,SnowballC,topicmodels,sentiment,data.table,syuzhet,plotly)"

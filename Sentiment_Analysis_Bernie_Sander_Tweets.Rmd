@@ -1,0 +1,369 @@
+---
+title: "Sentiment Analysis of Bernie Sander Tweets"
+date: "`r Sys.Date()`"
+author: Nils Indreiten
+output:
+  rmdformats::readthedown:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: tango
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+pacman::p_load(twitteR,ROAuth,tidyverse,tm,SnowballC,topicmodels,sentiment,data.table,syuzhet,plotly)
+```
+
+# Project Goal
+
+The goal of this project is to perform basic text processing on tweets.
+In order to obtain this data the [Twitter
+API](https://developer.twitter.com/en) was used. This allowed for the
+Bernie Sander tweets to be retrieved from the
+[BernieSanders](https://twitter.com/BernieSanders) Twitter account.
+
+## Twitter API
+
+Once you have a Twitter developer account, you can create a Twitter app
+to generate Twitter API, Access Token and Secret Keys etc. In order to
+retrieve the tweets you need the following:
+
+-   Consumer Key
+
+-   Consumer Secret
+
+-   Access Token
+
+-   Access Token Secret
+
+All of which can be accessed once you have created an app in the Twitter
+Developer portal. Once you have them, you can assign them to R objects
+as below, and authorize them using the setup_twitter_oath() :
+
+```{r, eval=FALSE}
+library(twitteR)
+library(ROAuth)
+consumer_key <-'your consumer key'
+consumer_secret <- 'your consumer secret'
+access_token <- 'your access token'
+access_secret <- 'your access secret'
+setup_twitter_oauth(consumer_key, consumer_secret, access_token,
+                    access_secret)
+```
+
+The twitteR package has certain parameters that enable us to retrieve
+data from a specific user. In order to do so we have to specify the
+Twitter ID and the number of tweets, in this case we specify
+'BernieSanders' and 583 tweets, from 2020-10-19 to 2021-08-17 (Twitter
+policy changes may affect the number of twitters you can pull):
+
+```{r, eval=FALSE}
+twitter_user <- 'BernieSanders'
+twitter_max <- 583
+```
+
+Next we can use the userTimeline() function to download the timeline
+(tweets) from the specified twitter_user. The function allows us to
+determine whether we also want to retrieve retweets and replied tweets,
+by specifying the relevant parameters. Consult the help documentation of
+the twitteR package for more details.
+
+```{r, eval=FALSE}
+tweets <- userTimeline(twitter_user, n = twitter_max, includeRts=FALSE)
+# Get the amount of tweets pulled:
+length(tweets)
+# Convert tweets to a data frame:
+tweets.df <- twListToDF(tweets)
+# save the downloaded tweets into a csv for future use
+file_name = "Bernie_tweets.csv"
+write.csv(tweets.df, file = file_name)
+```
+
+Once you have retrieved the tweets to your local environment or saved
+them as a csv file, you are ready to start exploring and pre-processing
+the data.
+
+# Data Pre-processing
+
+Load the Bernie Sanders tweets you previously saved:
+
+```{r}
+tweets.df <- read.csv('Bernie_tweets.csv', stringsAsFactors = FALSE)
+```
+
+Lets take a quick look at some of the tweets, for instance, say we are
+interested int he 150th tweet.:
+
+```{r, eval=FALSE}
+# Tweet number 150
+display_n <- 150
+tweets.df[display_n, c("text")]
+```
+
+```{r, include=FALSE}
+# Tweet number 150
+display_n <- 150
+tweets.df[display_n, c("text")]
+```
+
+> "The way to rebuild the crumbling middle class in this country is by
+> growing the trade union movement."
+
+Next in order to work with the text data properly we have to create a
+Corpus, which we can do using the Corpus() function from the tm package,
+it allows us to specify the source to be character vectors, we assign
+this to a new object, myCorpus:
+
+```{r}
+myCorpus_raw <- Corpus(VectorSource(tweets.df$text))
+myCorpus <- myCorpus_raw 
+myCorpus
+```
+
+Using the lapply function we can index the corpus object, returning the
+first three tweets:
+
+```{r}
+lapply(myCorpus[1:3], as.character)
+```
+
+Now, we would like to remove non-graphical characters, remove
+non-English words, and remove URLs.
+
+## Non-graphical characters:
+
+To replace non-graphical characters we will define an operation that
+replaces non-graphical characters with a space, we will name it toSpace,
+using the gsub function, and the content_transformer() function as a
+wrapper function:
+
+```{r}
+toSpace <- content_transformer(function(x, pattern) {return (gsub(pattern," ",x))})
+```
+
+In order to apply this to all non visible characters we will use
+'[\^[:graph:]]', which is a regular expression for all non-visible
+characters([Follow this link for more information on regular
+expressions.](http://www.regular-expressions.info/posixbrackets.html)):
+
+```{r, warning=FALSE}
+myCorpus<- tm_map(myCorpus,toSpace,"[^[:graph:]]")
+# Convert to lower case
+myCorpus <- tm_map(myCorpus, content_transformer(tolower))
+```
+
+## Removing URLs
+
+Once again to remove the URLs we use regular '[:space:]', which is
+another Regular expression for whitespace. What we are trying to do here
+is to match '[\^[:space:]]' (non-space) zero or multiple times, as a way
+to identify a URL. We will refer to this operation as removeURL and
+apply it to our Corpus object using the tm_map function:
+
+```{r,warning=FALSE}
+removeURL <- function(x) gsub("http[^[:space:]]*", "", x)
+myCorpus <- tm_map(myCorpus, content_transformer(removeURL))
+```
+
+## Removing Non-English words 
+
+To remove everything except English words or space, we take advantage of
+the '[\^[:alpha:][:space:]]\*' regular expression, assigning this
+operation to removeNumPunct then apply it to our Corpus as done in the
+previous step:
+
+```{r, warning=FALSE}
+removeNumPunct <- function(x) gsub("[^[:alpha:][:space:]]*", "", x) 
+myCorpus <- tm_map(myCorpus, content_transformer(removeNumPunct))
+# remove stopwords
+myCorpus <- tm_map(myCorpus, removeWords, stopwords()) 
+# remove extra whitespace
+myCorpus <- tm_map(myCorpus, stripWhitespace)
+```
+
+## Text stemming
+
+Text stemming basically reduces to their root form, the SnowballC
+package allows us to do so:
+
+```{r, warning=FALSE}
+library("SnowballC")
+myCorpus <- tm_map(myCorpus, stemDocument)
+```
+
+## Term Document Matrix 
+
+Our final data preparation step is to build a term document matrix. In
+this matrix each word is a row and each column, a tweet:
+
+```{r}
+tdm <- TermDocumentMatrix(myCorpus,control = list(wordLengths = c(1, Inf)))
+tdm
+nrow(tdm) # number of words
+ncol(tdm) # number of tweets
+
+```
+
+We can inspect the frequent word by specifying a frequency threshold, in
+this case we will set it to 30.
+
+```{r}
+freq_thre = 30
+# First few words:
+head((freq.terms <- findFreqTerms(tdm, lowfreq = freq_thre)))
+```
+
+Next we want to calculate the word frequency by using the rowSums
+function, and filter the matrix to only include words that appear more
+than the specified threshold:
+
+```{r}
+# calculate the word frenquency 
+term.freq <- rowSums(as.matrix(tdm)) 
+# only keep the frequencies of words(terms) appeared more then freq_thre times
+term.freq <- subset(term.freq, term.freq >= freq_thre) 
+```
+
+We may wish to plot the word frequencies:
+
+```{r, fig.cap="Frequency of terms"}
+library(ggplot2)
+# select the words(terms) appeared more then freq_thre times, according to selected term.freq
+df <- data.frame(term = names(term.freq), freq = term.freq)
+ggplot(df, aes(x=term, y=freq)) + geom_bar(stat="identity") +
+  xlab("Terms") + ylab("Count") + coord_flip() +
+  theme(axis.text=element_text(size=7))+theme_light()
+```
+
+# Associations
+
+We may want to consider which words are associated with a specific word,
+we can do so by specifying our word of interest and the correlation
+limit, specifying these parameters when calling the findAssocs()
+function from the tm package:
+
+```{r}
+word <- 'covid'
+cor_limit <- 0.2
+(findAssocs(tdm,word,cor_limit))
+```
+
+# Topic Modelling
+
+In order to conduct topic modelling, to try to identify themes in the
+tweets, we will use the topicmodels package. In order to do so we must
+convert our tdm object into a document term matrix, where wach row is a
+document (i.e. a tweet) and each column a term. Then we can specify the
+number of topics and terms that we are interested in:
+
+```{r}
+library(topicmodels)
+dtm <- as.DocumentTermMatrix(tdm)
+topic_num = 6
+term_num = 2
+rowTotals <- apply(dtm , 1, sum) #Find the sum of words in each Document (tweet)
+dtm  <- dtm[rowTotals> 0, ] #remove all docs without words
+lda <- LDA(dtm, k = topic_num) # find k topics
+term <- terms(lda, term_num) # first term_num terms of every topic
+(term <- apply(term, MARGIN = 2, paste, collapse = ", "))
+
+```
+
+# Sentiment Analysis
+
+Sentiment analysis can be useful to get an idea of the extent to which
+the tweets in question can be considered negative, positive, or neutral.
+To do so we will use the sentiment package. In order to find the
+sentiment we will use the raw text, which is in our tweets.df object:
+
+```{r, warning=FALSE}
+library(sentiment)
+# use the raw text for sentiment analysis 
+sentiments <- sentiment(tweets.df$text)
+table(sentiments$polarity)
+```
+
+We may wish to visualise the sentiment, where he negative values are
+associated with negative sentiment and positive values with positive
+sentiment, in contrast, neutral is 0:
+
+```{r, fig.cap="Sentiment of tweets, November 2020 to August 2021"}
+library(data.table)
+sentiments$score <- 0
+sentiments$score[sentiments$polarity == "positive"] <- 1
+sentiments$score[sentiments$polarity == "negative"] <- -1
+sentiments$date <- as.IDate(tweets.df$created)
+result <- aggregate(score ~ date, data = sentiments, sum)
+par(mar=c(2,2,2,2)) #set the margins of the plot
+plot(result, type = "l")
+```
+
+As we can see there seems to be a peak in positive sentiment in Bernie's
+tweets between the May and July periods.
+
+## Emotion Lexicon
+
+Alternatively we may use the emotion lexicon,which is a list of words
+and their respective associations with 8 emotions
+(anger,fear,anticipation,trust,surprise,sadness,joy and disgust), and
+two sentiments (negative and positive). FOr this we will use the syuzhet
+package. It is important that we use the cleaned data as the functions
+we will use from this package cannot handle non-graphic data:
+
+```{r}
+library(syuzhet)
+# use the cleaned text for emotion analysis 
+# since get_nrc_sentiment cannot deal with non-graphic data 
+tweet_clean <- data.frame(text = sapply(myCorpus, as.character), stringsAsFactors = FALSE)
+```
+
+In contrast to the previous section, in this case we have a matrix,
+where each row is a document (i.e. a tweet) and each column an emotion:
+
+```{r}
+# each row: a document (a tweet); each column: an emotion
+emotion_matrix <- get_nrc_sentiment(tweet_clean$text)
+```
+
+We need to format the matrix so that instead of each row being a tweet
+and each column and emotion, each row is an emotion and each column a
+tweet. To do so we will transpose the matrix.
+
+```{r}
+# Matrix Transpose
+td <- data.frame(t(emotion_matrix)) 
+#The function rowSums computes column sums across rows for each level of a grouping variable.
+td_new <- data.frame(rowSums(td))
+td_new
+```
+
+Finally some transformation and cleaning is necessary, in particular to
+rename and arrange the columns:
+
+```{r}
+#Transformation and cleaning
+names(td_new)[1] <- "count"
+td_new <- cbind("sentiment" = rownames(td_new), td_new)
+rownames(td_new) <- NULL
+knitr::kable(td_new)
+```
+
+Finally we may wish to visualise the sentiment, we add an interactive
+element here using the plotly package:
+
+```{r,fig.cap="Bernie Sanders tweet emotion and sentiment"}
+library(plotly)
+library(ggplot2)
+sentiment_plot <- qplot(sentiment, data=td_new, weight=count, geom="bar",fill=sentiment)+ggtitle("Tweets emotion and sentiment")+theme_minimal()+theme(axis.text.x=element_text(angle=45,vjust=1,hjust=1))
+ggplotly(sentiment_plot)
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

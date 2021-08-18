@@ -1,0 +1,22 @@
+"0","tdm <- TermDocumentMatrix(myCorpus,control = list(wordLengths = c(1, Inf)))"
+"0","tdm"
+"1","<<TermDocumentMatrix (terms: 1602, documents: 583)>>
+"
+"1","Non-/sparse entries: 6005/927961
+"
+"1","Sparsity           : 99%
+"
+"1","Maximal term length: 22
+"
+"1","Weighting          : term frequency (tf)
+"
+"0","nrow(tdm) # number of words"
+"1","[1]"
+"1"," 1602"
+"1","
+"
+"0","ncol(tdm) # number of tweets"
+"1","[1]"
+"1"," 583"
+"1","
+"
