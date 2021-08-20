@@ -1,5 +1,5 @@
 ---
-title: "Sentiment Analysis of Bernie Sander Tweets"
+title: "Sentiment Analysis of Bernie Sanders Tweets"
 date: "`r Sys.Date()`"
 author: Nils Indreiten
 output:
