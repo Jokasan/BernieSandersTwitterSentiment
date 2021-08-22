@@ -187,7 +187,7 @@ myCorpus <- tm_map(myCorpus, stripWhitespace)
 
 ## Text stemming
 
-Text stemming basically reduces to their root form, the SnowballC
+Text stemming basically reduces words to their root form, the SnowballC
 package allows us to do so:
 
 ```{r, warning=FALSE}
